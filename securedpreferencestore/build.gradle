@@ -2,16 +2,17 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: "com.jfrog.bintray"
 
-version = "0.3.1"
+def libVersion = '0.3.2'
+
 android {
     compileSdkVersion 25
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "25.0.1"
 
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 6
-        versionName version
+        versionCode 7
+        versionName "$libVersion"
     }
     buildTypes {
         release {
@@ -26,16 +27,15 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-def siteUrl = "https://github.com/iamMehedi/Secured-Preference-Store"
-def gitUrl = "https://github.com/iamMehedi/Secured-Preference-Store.git"
-
 group = "online.devliving"
+
+def siteUrl = "https://github.com/iamMehedi/Secured-Preference-Store"
+def gitUrl = 'https://github.com/airmap/Secured-Preference-Store.git'
 
 install {
     repositories.mavenInstaller {
         // This generates POM.xml with proper parameters
-        pom {
-            project {
+        pom.project {
                 packaging 'aar'
 
                 // Add your description here
@@ -62,8 +62,7 @@ install {
                     developerConnection gitUrl
                     url siteUrl
                 }
-            }
-        }
+        }.writeTo("$buildDir/pom.xml")
     }
 }
 
@@ -81,34 +80,24 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
+
 artifacts {
     archives javadocJar
     archives sourcesJar
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-// https://github.com/bintray/gradle-bintray-plugin
 bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
+    user = bintray_user
+    key = bintray_api_key
     configurations = ['archives']
     pkg {
-        repo = "SecuredPreferenceStore"
-        // it is the name that appears in bintray when logged
+        repo = 'maven'
+        userOrg = 'airmapio'
+        version libVersion
         name = "online.devliving:securedpreferencestore"
+        description = 'A secured SharedPreference wrapper for Android'
+        licenses = ["Apache-2.0"]
         websiteUrl = siteUrl
         vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-        version {
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password")
-                //Optional. The passphrase for GPG signing'
-            }
-        }
     }
 }
